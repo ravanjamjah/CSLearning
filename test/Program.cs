@@ -1,5 +1,7 @@
 ﻿using CustomCollection.Classes;
 using System;
+using System.Linq;
+using System.Reflection;
 using static CustomCollection.Classes.MyProjectEnums;
 
 namespace CustomCollection
@@ -10,11 +12,11 @@ namespace CustomCollection
         {
             try
             {
-                int i = 42;
-                System.Type type = i.GetType();
-                System.Console.WriteLine(type);
+                var viewModelName = "TestReflection";
+                var viewModelType = FindEntitiy(viewModelName);
+                var viewModel = Activator.CreateInstance(viewModelType);
 
-                //test
+                #region queue and stack
                 // استک و صف همزمان
                 Console.WriteLine("queue: ");
                 FifoLifoList<string> fl = new FifoLifoList<string>((int)CollectionNames.Queue);
@@ -100,11 +102,24 @@ namespace CustomCollection
                 stack.Push("second");
                 stack.Push("third");
                 stack.PrintAll();
+                #endregion
+                //test
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        private static Type FindEntitiy(string viewName, string assembly = "CustomCollection",
+            string namespac = "CustomCollection.Classes")
+        {
+            var asmMain = Assembly.Load(new AssemblyName(assembly));
+            return asmMain.GetTypes().Where(type => type.BaseType != null && type.Namespace != null && !type.IsAbstract &&
+                                               type.Namespace.Contains(namespac) &&
+                                               type.Name == viewName
+                                               ).FirstOrDefault();
         }
     }
 }
